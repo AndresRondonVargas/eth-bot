@@ -8,12 +8,10 @@ CHAT_ID = os.getenv("CHAT_ID")
 ARCHIVO = "eth_data.json"
 
 
-def obtener_precio_22_marzo():
-    url = "https://api.coingecko.com/api/v3/coins/ethereum/history"
-    params = {"date": "22-03-2026"}
-    data = requests.get(url, params=params).json()
-    
-    return data["market_data"]["current_price"]["usd"]
+def obtener_precio_eth():
+    url = "https://api.coingecko.com/api/v3/simple/price"
+    params = {"ids": "ethereum", "vs_currencies": "usd"}
+    return requests.get(url, params=params).json()["ethereum"]["usd"]
 
 
 def enviar_telegram(mensaje):
@@ -22,21 +20,46 @@ def enviar_telegram(mensaje):
     print(response.text)
 
 
-def guardar(data):
-    with open(ARCHIVO, "w") as f:
-        json.dump(data, f, indent=2)
+def cargar():
+    try:
+        with open(ARCHIVO) as f:
+            return json.load(f)
+    except:
+        return {}
 
 
 def main():
-    precio = obtener_precio_22_marzo()
+    data = cargar()
 
-    data = {
-        "precio_base": precio
-    }
+    precio_base = data.get("precio_base", None)
 
-    guardar(data)
+    if precio_base is None:
+        enviar_telegram("❌ No hay precio base")
+        return
 
-    enviar_telegram(f"📌 Precio real del 22 marzo guardado: ${precio}")
+    precio_actual = obtener_precio_eth()
+
+    diferencia = precio_actual - precio_base
+    porcentaje = (diferencia / precio_base) * 100
+
+    if precio_actual > precio_base:
+        estado = "📈 SUBIÓ"
+    elif precio_actual < precio_base:
+        estado = "📉 BAJÓ"
+    else:
+        estado = "➖ IGUAL"
+
+    mensaje = f"""
+🧪 PRUEBA (23 Marzo)
+
+💰 Base (22 marzo): ${round(precio_base,2)}
+📅 Hoy: ${round(precio_actual,2)}
+
+{estado}
+📊 Cambio: {round(porcentaje,2)}%
+"""
+
+    enviar_telegram(mensaje)
 
 
 if __name__ == "__main__":
