@@ -16,8 +16,7 @@ def obtener_precio_eth():
 
 def enviar_telegram(mensaje):
     url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
-    response = requests.post(url, data={"chat_id": CHAT_ID, "text": mensaje})
-    print(response.text)
+    requests.post(url, data={"chat_id": CHAT_ID, "text": mensaje})
 
 
 def cargar():
@@ -34,7 +33,7 @@ def main():
     precio_base = data.get("precio_base", None)
 
     if precio_base is None:
-        enviar_telegram("❌ No hay precio base")
+        enviar_telegram("❌ No hay precio base guardado")
         return
 
     precio_actual = obtener_precio_eth()
@@ -50,9 +49,9 @@ def main():
         estado = "➖ IGUAL"
 
     mensaje = f"""
-🧪 PRUEBA (23 Marzo)
+📊 ETH vs 22 Marzo
 
-💰 Base (22 marzo): ${round(precio_base,2)}
+💰 Base: ${round(precio_base,2)}
 📅 Hoy: ${round(precio_actual,2)}
 
 {estado}
