@@ -31,12 +31,11 @@ def cargar():
 def main():
     data = cargar()
 
-    precio_base = data.get("precio_base", None)
-
-    if precio_base is None:
-        enviar_telegram("❌ No hay precio base")
+    if "precio_base" not in data:
+        enviar_telegram("❌ No hay precio base guardado")
         return
 
+    precio_base = data["precio_base"]
     precio_actual = obtener_precio_eth()
 
     diferencia = precio_actual - precio_base
@@ -50,7 +49,7 @@ def main():
         estado = "➖ IGUAL"
 
     mensaje = f"""
-🧪 PRUEBA (23 Marzo)
+📊 ETH vs 22 Marzo
 
 💰 Base (22 marzo): ${round(precio_base,2)}
 📅 Hoy: ${round(precio_actual,2)}
